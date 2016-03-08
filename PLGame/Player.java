@@ -1,55 +1,45 @@
-/**
- * COMP6721
- * Polarized Ladder Game
- * March 2, 2013 
- */
-
 
 import java.awt.Point;
 import java.util.Scanner;
 
-/**
- * @author dimitri.tiago
- * 
- */
+
 public class Player {
 
-	protected int discs;			// number of discs available
+	protected int discs;
 	
 	protected String playerName;	
 	protected char playerToken;
-	
-	Board board;
+
+	GameBoard gameBoard;
 	
 	public Player(){
 		
 	}
-	public Player(String playerName, char playerToken, int discs, Board board) {
+
+	public Player(String playerName, char playerToken, int discs, GameBoard gameBoard) {
 		
 		this.playerName 	= playerName;
 		this.discs 			= discs;
 		this.playerToken 	= playerToken;
-		
-		this.board = board;
+
+		this.gameBoard = gameBoard;
 	}
 	
 	public boolean setDisc(int i, int j) {
-		
-		return board.setPosition(j, i, String.valueOf(playerToken));
+
+		return gameBoard.setPosition(j, i, String.valueOf(playerToken));
 		}
 	
 public Point doPlayerTurn(Player player) {
 		
 		System.out.printf("Please enter your next move %s (ex. 1A):", player.getPlayerName());
-		
-		// command line input scanner
-		Scanner input = new Scanner(System.in);	
+
+	Scanner input = new Scanner(System.in);
 		
 		try
 		{
 			String playerMove 	= input.nextLine();
-			
-			// parse player move
+
 			String rowTemp 	= playerMove.substring(0,1);	
 			int row 		= Integer.parseInt(rowTemp);
 			char [] colTemp = playerMove.toUpperCase().toCharArray();

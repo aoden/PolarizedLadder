@@ -3,44 +3,45 @@
 import java.awt.Point;
 
 public class Position {
-	
-	int i;
-	int j;
+
+	int x;
+	int y;
 	String mark; 
 	Point point;
-	
-	
- public Position(int i, int j, String mark){
-	 
-	  this.point.x = i;
-	  this.point.y = j;
+
+
+	public Position(int x, int y, String mark) {
+
+		this.point.x = x;
+		this.point.y = y;
 	  this.mark = mark;
-	  this.point = new Point(i, j);
+		this.point = new Point(x, y);
  }
 
  public Position(Point p, String mark){
-	  this.i =p.x;
-	  this.j =p.y;
+	 this.x = p.x;
+	 this.y = p.y;
 	  this.mark = mark;
 	 
 }
-public int getI() {
-	return i;
+
+	public int getX() {
+		return x;
 }
 
 
-public void setI(int i) {
-	this.i = i;
+	public void setX(int x) {
+		this.x = x;
 }
 
 
-public int getJ() {
-	return j;
+	public int getY() {
+		return y;
 }
 
 
-public void setJ(int j) {
-	this.j = j;
+	public void setY(int y) {
+		this.y = y;
 }
 
 

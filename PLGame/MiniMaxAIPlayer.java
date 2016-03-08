@@ -1,69 +1,54 @@
-
-
 import java.util.Iterator;
 
-
-
-//for this to work the Parent must keep a pointer?? to the child with minimum or max value??
 public class MiniMaxAIPlayer {
 
-	Board maxBoard;
-	Board minBoard;
+	GameBoard maxGameBoard;
+	GameBoard minGameBoard;
 
-	public Board getMaxMove(Node<Board> n){
+	public GameBoard getMaxMove(Node<GameBoard> n) {
 		
 		int max =  Integer.MIN_VALUE;
-		int maxtemp = Integer.MIN_VALUE;//must be some other number???
-    
-        
-		Iterator<Node<Board>> it = n.getChildren().iterator();
-		maxBoard =it.next().getData(); 
-		max = maxBoard.getHeuristic();
-		//System.out.println("h  from minimax " + maxBoard.getHeuristic());		
+		int maxtemp = Integer.MIN_VALUE;
+
+		Iterator<Node<GameBoard>> it = n.getChildren().iterator();
+		maxGameBoard = it.next().getData();
+		max = maxGameBoard.getHeuristic();
 
 		while( it.hasNext() )
 		{
-            Board	boardTemp = it.next().getData();
-			maxtemp =  boardTemp.getHeuristic();
+			GameBoard gameBoardTemp = it.next().getData();
+			maxtemp = gameBoardTemp.getHeuristic();
 			if(maxtemp != 0){
 			if(maxtemp >= max){
-				 maxBoard = boardTemp;
+				maxGameBoard = gameBoardTemp;
 				 max = maxtemp;
 				 }
 		    }
 			n.getData().setHeuristic(max);
-			maxBoard.setHeuristic(max);
-			
+			maxGameBoard.setHeuristic(max);
 		}
-		//maxBoard = n.getData();
-		//System.out.println("h  from max " + n.getData().getHeuristic());
-		return maxBoard;
+		return maxGameBoard;
 	}
 
-	public Board getMinMove(Node<Board> n){
+	public GameBoard getMinMove(Node<GameBoard> n) {
 
 		int min =  Integer.MAX_VALUE;
 		int mintemp = Integer.MAX_VALUE;
-        //we need to shallow the search at the end of the game ie depth at 3 points = 2 at 2 = 1 etc so....
-		Iterator<Node<Board>> it = n.getChildren().iterator();
-		minBoard =it.next().getData(); 
-		min = minBoard.getHeuristic();
+		Iterator<Node<GameBoard>> it = n.getChildren().iterator();
+		minGameBoard = it.next().getData();
+		min = minGameBoard.getHeuristic();
 
 		while( it.hasNext() )
 		{
-			Board	boardTemp = it.next().getData();
-			mintemp =  boardTemp.getHeuristic();
+			GameBoard gameBoardTemp = it.next().getData();
+			mintemp = gameBoardTemp.getHeuristic();
 			if(mintemp <= min){
-				minBoard = boardTemp;
-			    min = mintemp;	
+				minGameBoard = gameBoardTemp;
+				min = mintemp;
 			}
 			n.getData().setHeuristic(min);
-			minBoard.setHeuristic(min);
-			//System.out.println("h  from min " + minBoard.getHeuristic());
+			minGameBoard.setHeuristic(min);
 		}
-		//System.out.println("h  from min " + n.getData().getHeuristic());
-		return minBoard;
-
+		return minGameBoard;
 	}
-
 }

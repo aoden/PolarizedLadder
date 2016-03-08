@@ -1,239 +1,188 @@
-
-
-import java.awt.Point;
+import java.awt.*;
 import java.util.Iterator;
 
 
+public class AIPlayer extends Player {
 
-public class AIPlayer extends Player{
-    
-	private char AIPlayerToken;
-	private String AIPlayerString;
-	private String OpponentString;
-	private int maxDepth;
-	private MiniMaxAIPlayer minimax;
-    
-	private LadderPatternStrategy heuristics;
-	
-	private AIPlayer aip;
-	private Player p;
-    
-	private Board nextBoard;
-	
-	public AIPlayer(){
-		
-		super();
-	}
-	
-	public AIPlayer(String playerName, char playerToken, int discs, Board board) {
-        
-		super.playerName  = playerName;
-		super.playerToken = playerToken;
-		super.discs 	  = discs;
-		this.board        = board;
-		nextBoard		  = new Board();
-		heuristics 		  = new LadderPatternStrategy();
+    private char AIPlayerToken;
+    private String AIPlayerString;
+    private String OpponentString;
+    private int maxDepth;
+    private MiniMaxAIPlayer minimax;
+
+    private LadderPatternStrategy heuristics;
+
+    private AIPlayer aip;
+    private Player p;
+
+    private GameBoard nextGameBoard;
+
+    public AIPlayer() {
+
+        super();
+    }
+
+    public AIPlayer(String playerName, char playerToken, int discs, GameBoard gameBoard) {
+
+        super.playerName = playerName;
+        super.playerToken = playerToken;
+        super.discs = discs;
+        this.gameBoard = gameBoard;
+        nextGameBoard = new GameBoard();
+        heuristics = new LadderPatternStrategy();
         minimax = new MiniMaxAIPlayer();
-		AIPlayerToken 	  = playerToken;
-		AIPlayerString 	  = String.valueOf(AIPlayerToken);
-		
-		System.out.println("AIPlayer " + playerName);
-	}
-    
-	public Point doAIPlayerTurn(AIPlayer ai, Player p, SearchLists searchList){
-		
-		Point discCoordinates;
-        
-		this.aip  			= ai;
-		this.p 	  			= p;
-		this.OpponentString = String.valueOf(p.playerToken);
-		
-		
-		try
-		{
-			discCoordinates = aip.move(this.board, searchList);
-			searchList.removePoint(discCoordinates, searchList);
-			return discCoordinates;
-		}
-		catch (ArrayIndexOutOfBoundsException aiob)
-		{
-			System.out.println("Invalid move.");
-			return doPlayerTurn(ai);
-		}
-		catch(NumberFormatException nf)
-		{
-			System.out.println("Invalid move.");
-			return doPlayerTurn(ai);
-		}
-        
-	}
-    
-	private Point move(Board board, SearchLists searchList)
-	{
-		// local variables
-		int startTreeDepth = 1;
-		int emptySpaces = board.getBoardEmptySpaces();
-        if(emptySpaces > 32){
-        	maxDepth = 2;
-        	System.out.println("Depth : " + maxDepth);
+        AIPlayerToken = playerToken;
+        AIPlayerString = String.valueOf(AIPlayerToken);
+
+        System.out.println("AIPlayer " + playerName);
+    }
+
+    public Point doAIPlayerTurn(AIPlayer ai, Player p, SearchLists searchList) {
+
+        Point discCoordinates;
+
+        this.aip = ai;
+        this.p = p;
+        this.OpponentString = String.valueOf(p.playerToken);
+
+
+        try {
+            discCoordinates = aip.move(this.gameBoard, searchList);
+            searchList.removePoint(discCoordinates, searchList);
+            return discCoordinates;
+        } catch (ArrayIndexOutOfBoundsException aiob) {
+            System.out.println("Invalid move.");
+            return doPlayerTurn(ai);
+        } catch (NumberFormatException nf) {
+            System.out.println("Invalid move.");
+            return doPlayerTurn(ai);
         }
-        else if(emptySpaces > 12){  
-        maxDepth = 3;
-        System.out.println("Depth : " + maxDepth);
+
+    }
+
+    private Point move(GameBoard gameBoard, SearchLists searchList) {
+
+        int startTreeDepth = 1;
+        int emptySpaces = gameBoard.getEnptyCells();
+        if (emptySpaces > 32) {
+            maxDepth = 2;
+            System.out.println("Depth : " + maxDepth);
+        } else if (emptySpaces > 12) {
+            maxDepth = 3;
+            System.out.println("Depth : " + maxDepth);
+        } else if (emptySpaces > 4) {
+
+
+            maxDepth = 4;
+            System.out.println("Depth : " + maxDepth);
+        } else {
+
+            maxDepth = 1;
+            System.out.println("Depth : " + maxDepth);
         }
-        
-        else if(emptySpaces > 4){
-        	
-        	
-        	maxDepth = 4;
-        	System.out.println("Depth : " + maxDepth);
+
+        TreeImpl<GameBoard> searchTreeImpl = createTree(gameBoard);
+
+        createStateSpace(searchTreeImpl.getRoot(), searchList, startTreeDepth, AIPlayerString, gameBoard);
+
+        return nextGameBoard.getLastBoardPosition();
+
+    }
+
+    public TreeImpl<GameBoard> createTree(GameBoard gameBoard) {
+
+        TreeImpl<GameBoard> searchTreeImpl = new TreeImpl<GameBoard>(gameBoard);
+        Node<GameBoard> root = new Node<GameBoard>();
+
+        searchTreeImpl.setRoot(root);
+        root.setData(gameBoard);
+
+        return searchTreeImpl;
+    }
+
+
+    public void createStateSpace(Node<GameBoard> parentNode, SearchLists searchList, int depthOfTree, String currPlayer, GameBoard oldState) {
+
+        Iterator<Point> openPoints = searchList.getIterator();
+
+
+        if (depthOfTree == maxDepth) {
+            while (openPoints.hasNext()) {
+                GameBoard newGameBoard = new GameBoard();
+                newGameBoard.setState(oldState.copyArray());
+
+                Point nextPoint = openPoints.next();
+                Position nextPosition = new Position(nextPoint, currPlayer);
+
+                if (newGameBoard.setObjectPosition(nextPosition)) {
+                    newGameBoard.setHeuristic(heuristics.calculate((Player) aip, this.p, newGameBoard));
+                    Node<GameBoard> nextChild = new Node<GameBoard>();
+                    nextChild.setParent(parentNode);
+                    nextChild.setData(newGameBoard);
+                    parentNode.addChild(nextChild);
+
+                }
+            }
+
+            miniMaxMove(parentNode, depthOfTree);    // minimax
+
+        } else {
+            while (openPoints.hasNext()) {
+
+                GameBoard newGameBoard = new GameBoard();
+                newGameBoard.setState(oldState.copyArray());
+                Point nextPoint = openPoints.next();
+                Position nextPosition = new Position(nextPoint, currPlayer);                            // get next move
+
+                if (newGameBoard.setObjectPosition(nextPosition)) {
+                    Node<GameBoard> nextChild = new Node<GameBoard>();
+                    nextChild.setParent(parentNode);
+                    nextChild.setData(newGameBoard);
+                    parentNode.addChild(nextChild);
+                }
+            }
+
+            for (Node<GameBoard> childNode : parentNode.getChildren()) {
+
+                String nextToken = (currPlayer == AIPlayerString) ? OpponentString : AIPlayerString;
+
+                createStateSpace(childNode, searchList, depthOfTree + 1, nextToken, childNode.getData());
+            }
         }
-        
-        else {
-        	//decrease by depth each time??
-        	maxDepth = 1;
-        	System.out.println("Depth : " + maxDepth);
+    }
+
+    public void miniMaxMove(Node<GameBoard> parentNode, int depthOfTree) {
+
+        if (depthOfTree == 1) {
+            GameBoard maxGameBoard = minimax.getMaxMove(parentNode);
+            parentNode.setData(maxGameBoard);
+            nextGameBoard = maxGameBoard;
+
+            return;
         }
-        // create new tree with board
-		Tree<Board> searchTree = createTree(board);
-        
-        // generate all potential next moves
-        createStateSpace(searchTree.getRoot(), searchList, startTreeDepth, AIPlayerString, board);
-        
-        return nextBoard.getLastBoardPosition();
+        if (depthOfTree % 2 == 1) {
 
-	}
-	
-	public Tree<Board> createTree(Board board)
-	{
-        // create new tree with board
-        Tree<Board> searchTree = new Tree<Board>(board);
-        Node<Board> root       = new Node<Board>();
-        
-        searchTree.setRoot(root);
-        root.setData(board);
-        
-        return searchTree;
-	}
-	
+            GameBoard maxGameBoard = minimax.getMaxMove(parentNode);
 
-	
-	public void createStateSpace(Node<Board> parentNode, SearchLists searchList, int depthOfTree, String currPlayer, Board oldState)
-	{
-		// generate all potential next moves
-        Iterator<Point> openPoints = searchList.getIterator();														
-      
-        // and shared with sub-trees.
-		if (depthOfTree == maxDepth)
-		{
-			while (openPoints.hasNext())
-			{
-				// prepare new board
-				Board newBoard = new Board();
-				newBoard.setState(oldState.cloneArray());
-                
-				// generate next move
-				Point nextPoint 	  = openPoints.next();
-				Position nextPosition = new Position(nextPoint, currPlayer);							// get next move
-			
-				if ( newBoard.setObjectPosition(nextPosition) )
-				{	
-					newBoard.setHeuristic(heuristics.calculate( (Player) aip, this.p, newBoard) );
-				//	newBoard.printBoard();
-					// calculate next move heuristics (at leaves only)
-				//	System.out.println("H from building tree " + newBoard.getHeuristic());
-					// add next move child node to tree
-					Node<Board> nextChild = new Node<Board>();
-					nextChild.setParent(parentNode);
-					nextChild.setData(newBoard);
-					parentNode.addChild(nextChild);
-					
-				}
-			//	else
-			//	{
-			//		System.out.println("not created" );
-			//	}
-			}
-		
-	    	miniMaxMove(parentNode, depthOfTree);	// minimax
+            parentNode.setHeuristic(maxGameBoard.getHeuristic());
+            miniMaxMove(parentNode.getParent(), depthOfTree - 1);
 
-		}
-	
-		else
-		{
-			while (openPoints.hasNext())
-			{
-				// prepare new board
-				Board newBoard = new Board();
-				newBoard.setState(oldState.cloneArray());
-				
-				// generate next move
-				Point nextPoint 	  = openPoints.next();
-				Position nextPosition = new Position(nextPoint, currPlayer);							// get next move
-	
-				if ( newBoard.setObjectPosition(nextPosition) )
-				{
-					//newBoard.printBoard();
-					
-					// add next move child node to tree
-					Node<Board> nextChild = new Node<Board>();
-					nextChild.setParent(parentNode);
-					nextChild.setData(newBoard);
-					parentNode.addChild(nextChild);
-				}
-			}
+        } else if (depthOfTree % 2 == 0) {
 
-        	for (Node<Board> childNode : parentNode.getChildren())
-        	{
-        		// populate child sub-tree
-        		String nextToken = (currPlayer == AIPlayerString) ? OpponentString : AIPlayerString;
-        		
-        		createStateSpace(childNode, searchList, depthOfTree + 1, nextToken, childNode.getData());
-        	}
-		}
-	}
+            GameBoard minGameBoard = minimax.getMinMove(parentNode);
+            parentNode.setHeuristic(minGameBoard.getHeuristic());
+            miniMaxMove(parentNode.getParent(), depthOfTree - 1);
+        }
 
-public void miniMaxMove(Node<Board> parentNode, int depthOfTree){
-	
-	if(depthOfTree == 1)
-	{
-		Board maxBoard = minimax.getMaxMove(parentNode);
-	    parentNode.setData(maxBoard);
-	    nextBoard = maxBoard;
-	   // System.out.println("MiniMax Best Move " + maxBoard.getHeuristic() + " - depth - " + depthOfTree);
-	    return;
-	}
-	      //if depth % 2 == 1 then max
-		if(depthOfTree%2 == 1){
-			
-			Board maxBoard = minimax.getMaxMove(parentNode);
-			//maxBoard.printBoard();
-			parentNode.setHeuristic(maxBoard.getHeuristic());
-			
-		//	System.out.println("MiniMax Max Move " + maxBoard.getHeuristic() + " - depth - " + depthOfTree); // + parentNode.getChildren().size() + " leaf nodes." );
-		//	System.out.println("Created: " + parentNode.getChildren().size() + " leaf nodes." );
-			miniMaxMove(parentNode.getParent(), depthOfTree-1);
-		
-		} else if(depthOfTree%2 == 0){
-			
-			Board minBoard = minimax.getMinMove(parentNode);
-		//	minBoard.printBoard();
-			
-			parentNode.setHeuristic(minBoard.getHeuristic());
-		//	System.out.println("MiniMax Min Move " + minBoard.getHeuristic() + " " + depthOfTree); // + parentNode.getChildren().size() + " leaf nodes." );
-		//	System.out.println("Created: " + parentNode.getChildren().size() + " leaf nodes." );
-		    miniMaxMove(parentNode.getParent(), depthOfTree-1);
-		}
-	
-}
+    }
 
-public int getMaxDepth() {
-	return maxDepth;
-}
+    public int getMaxDepth() {
+        return maxDepth;
+    }
 
-public void setMaxDepth(int maxDepth) {
-	this.maxDepth = maxDepth;
-}
+    public void setMaxDepth(int maxDepth) {
+        this.maxDepth = maxDepth;
+    }
 
 
 }

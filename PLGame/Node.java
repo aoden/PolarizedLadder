@@ -1,10 +1,16 @@
-
 import java.util.ArrayList;
-
-
 
 public class Node<T> {
 	
+	private int heuristic;
+    private T data;
+    private Node<T> parent;
+	private ArrayList<Node<T>> children;
+    public Node()
+    {
+    	children = new ArrayList<Node<T>>();
+    }
+
 	public int getHeuristic() {
 		return heuristic;
 	}
@@ -13,17 +19,7 @@ public class Node<T> {
 		this.heuristic = heuristic;
 	}
 
-	private int heuristic;
-    private T data;
-    private Node<T> parent;
-	private ArrayList<Node<T>> children;
-    
-    public Node()
-    {
-    	children = new ArrayList<Node<T>>();
-    }
-    
-    public Node<T> getParent() {
+	public Node<T> getParent() {
 		return parent;
 	}
 	public void setParent(Node<T> parent) {

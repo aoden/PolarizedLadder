@@ -1,28 +1,22 @@
-package tree;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class Tree<E> implements TreeInterface<E> {
+public class TreeImpl<E> implements Tree<E> {
 
 	  private Node<E> root;
-	 
-	 
-	
 
-		public Tree(E rootData) {
-	        root = new Node<E>();
+	public TreeImpl(E rootData) {
+		root = new Node<E>();
 	        root.setData(rootData);
 	        root.setChildren(new ArrayList<Node<E>>());
 	    }
-	
 	
 	public boolean isEmpty(){ 
 		
 		return (root==null);
 	}
-	
-	
+
 	public boolean isRoot(){
 		     return (root.getParent()==null);
 	}
@@ -52,17 +46,8 @@ public class Tree<E> implements TreeInterface<E> {
 		return root;
 	}
 
-
 	public void setRoot(Node<E> root) {
 		this.root = root;
 	}
 
-//	public boolean hasChildren(Node<E> t){
-	//	return (!t.getChildren().isEmpty());
-	//}
-	 //parent(v);
-	   //root();
-	    //children of v if is empty then returns
-
-	
 }
